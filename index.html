@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Timi小手机</title>
-<script src="https://cdn.jsdelivr.net/npm/streamsaver@2.0.6/StreamSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/streamsaver@2.0.6/StreamSaver.min.js" integrity="sha384-KJHT27nRt8CLMUf9Up3XewfKPXa+6FSzh/gvEJfnVQ9uihtK6DlaMChPvhxuce3N" crossorigin="anonymous"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
 
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <meta name="apple-mobile-web-app-title" content="Timi">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="icons/icon.svg">
@@ -8108,6 +8108,7 @@ input:checked + .mini-slider:before { transform: translateX(16px); }
                      <div class="form-group">
                         <label class="form-label">API密钥</label>
                         <input type="password" class="form-input" id="api-key-input" placeholder="输入聊天API密钥">
+                        <small style="color: #e67e22; font-size: 11px; margin-top: 4px; display: block;">⚠️ 安全提示：Gemini API 会将密钥附加在 URL 参数中传输（Google API 设计限制），建议使用中转服务或专用密钥。</small>
                     </div>
                     
                     <div class="form-group">
@@ -11554,11 +11555,60 @@ input:checked + .mini-slider:before { transform: translateX(16px); }
 </div>
     </div>
 </div>
-<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js" integrity="sha384-dywvLwViL92n+QthV4upN6kNVP1m2iJsHuvKtaQCVku/qBOz5hLFdL2j7ztKJUiW" crossorigin="anonymous"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
 <script>
     // --------------------------------------------------------------------
-    // 1. 自定义数据库模块 
+    // 0. 全局安全工具函数
+    // --------------------------------------------------------------------
+
+    /**
+     * HTML 特殊字符转义，防止 XSS 注入
+     * @param {string} str - 需要转义的字符串
+     * @returns {string} 转义后的安全字符串
+     */
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;');
+    }
+
+    /**
+     * 递归清理对象中的原型链污染键（__proto__, constructor, prototype）
+     * @param {*} obj - 需要清理的对象
+     * @returns {*} 清理后的安全对象
+     */
+    function sanitizeObject(obj) {
+        if (obj === null || typeof obj !== 'object') return obj;
+        if (Array.isArray(obj)) return obj.map(item => sanitizeObject(item));
+        const clean = {};
+        for (const key of Object.keys(obj)) {
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+            clean[key] = sanitizeObject(obj[key]);
+        }
+        return clean;
+    }
+
+    /**
+     * 图片 URL 协议白名单校验
+     * @param {string} url - 图片 URL
+     * @returns {string} 安全的 URL 或空占位符
+     */
+    function safeImgSrc(url) {
+        if (!url || typeof url !== 'string') return '';
+        const trimmed = url.trim();
+        if (/^https?:\/\//i.test(trimmed)) return trimmed;
+        if (/^data:image\//i.test(trimmed)) return trimmed;
+        if (/^blob:/i.test(trimmed)) return trimmed;
+        return '';
+    }
+
+    // --------------------------------------------------------------------
+    // 1. 自定义数据库模块
     // --------------------------------------------------------------------
     class AppStorage {
         constructor(dbName, version, storesConfig) {
@@ -12011,7 +12061,7 @@ function updateUI() {
         if (isCurrentlyPlaying) {
             item.classList.add('playing');
         }
-        item.innerHTML = `<div class="playlist-title">${song.title}</div><div class="playlist-artist">${song.artist || ''}</div>`;
+        item.innerHTML = `<div class="playlist-title">${escapeHtml(song.title)}</div><div class="playlist-artist">${escapeHtml(song.artist || '')}</div>`;
         
         item.addEventListener('click', async () => {
             const songIndexToPlay = contact.sharedPlaylist.tracks.findIndex(t => createKey(t) === createKey(song));
@@ -12057,7 +12107,7 @@ function parseLyrics(lrc) {
         function renderLyrics() {
             const lyricsWrapper = document.getElementById('lyrics-wrapper');
             lyricsWrapper.innerHTML = '';
-            lyrics.forEach(line => { lyricsWrapper.innerHTML += `<p class="lyric-line">${line.text}</p>`; });
+            lyrics.forEach(line => { lyricsWrapper.innerHTML += `<p class="lyric-line">${escapeHtml(line.text)}</p>`; });
         }  
         
         const STRANGER_AVATARS = [
@@ -12133,11 +12183,37 @@ function parseLyrics(lrc) {
 
         let state = JSON.parse(JSON.stringify(INITIAL_STATE)); // 这是你原来的代码
         
-        // ▼▼▼▼▼▼ 添加下面这三行（开后门） ▼▼▼▼▼▼
-        window.state = state;           // 把 state 挂到窗口上
-        window.timiMemory = timiMemory; // 把数据库挂到窗口上
-        window.openChat = openChat;     // 把打开聊天函数挂到窗口上
-        // ▲▲▲▲▲▲ 添加结束 ▲▲▲▲▲▲
+        // ▼▼▼▼▼▼ 安全加固：受限调试代理（不暴露敏感数据） ▼▼▼▼▼▼
+        window._timiDebug = {
+            get activeChatId() { return state.activeChatId; },
+            getLatestApiLog(contactId) {
+                const c = state.contacts.find(c => c.id === contactId);
+                return c ? c.latestApiLog : null;
+            }
+        };
+        // timiMemory 仅暴露受限包装（锁屏密码等场景使用）
+        window.timiMemory = {
+            get: (store, key) => timiMemory.get(store, key),
+        };
+        // openChat 保持可用（被外部调试面板引用）
+        window.openChat = openChat;
+        // 受限 state 代理：隐藏 apiSettings 中的 apiKey
+        window.state = new Proxy(state, {
+            get(target, prop) {
+                if (prop === 'apiSettings' || prop === 'squareApiSettings' || prop === 'snoopApiSettings') {
+                    const settings = target[prop];
+                    if (!settings) return settings;
+                    return new Proxy(settings, {
+                        get(s, k) {
+                            if (k === 'apiKey') return undefined;
+                            return s[k];
+                        }
+                    });
+                }
+                return target[prop];
+            }
+        });
+        // ▲▲▲▲▲▲ 安全加固结束 ▲▲▲▲▲▲
         state.currentChatMode = state.currentChatMode || 'chat';
         let automationTimer = null;
         let nextAutomationTimestamp = 0;
@@ -12331,9 +12407,9 @@ async function loadDataFromDB() {
             state.emoticons = emoticons;
             state.musicLibrary = musicLibrary;
             state.thoughtPresets = thoughtPresets.length > 0 ? thoughtPresets : INITIAL_STATE.thoughtPresets;
-            state.apiSettings = apiSettings ? { ...INITIAL_STATE.apiSettings, ...apiSettings } : { id: 'main', ...INITIAL_STATE.apiSettings };
-            state.squareApiSettings = squareApiSettings ? { ...INITIAL_STATE.squareApiSettings, ...squareApiSettings } : { id: 'main', ...INITIAL_STATE.squareApiSettings };
-            state.myProfile = { ...INITIAL_STATE.myProfile, ...myProfile };
+            state.apiSettings = apiSettings ? { ...INITIAL_STATE.apiSettings, ...sanitizeObject(apiSettings) } : { id: 'main', ...INITIAL_STATE.apiSettings };
+            state.squareApiSettings = squareApiSettings ? { ...INITIAL_STATE.squareApiSettings, ...sanitizeObject(squareApiSettings) } : { id: 'main', ...INITIAL_STATE.squareApiSettings };
+            state.myProfile = { ...INITIAL_STATE.myProfile, ...sanitizeObject(myProfile) };
             state.myProfile.balance = state.myProfile.balance || 1000;
             state.myProfile.investments = state.myProfile.investments || {};
                      // ▼▼▼ 把下面这段新代码粘贴到这里 ▼▼▼
@@ -12348,11 +12424,11 @@ async function loadDataFromDB() {
             state.transactions = transactions;
             state.trendingTopics = trendingTopics;
             state.apiPresets = apiPresets || [];
-            state.forumSettings = forumSettings ? { ...INITIAL_STATE.forumSettings, ...forumSettings } : { id: 'main', ...INITIAL_STATE.forumSettings };
+            state.forumSettings = forumSettings ? { ...INITIAL_STATE.forumSettings, ...sanitizeObject(forumSettings) } : { id: 'main', ...INITIAL_STATE.forumSettings };
             state.forumSettings.allowedPosterIds = state.forumSettings.allowedPosterIds || [];
             state.forumArchives = forumArchives || [];
             state.maps = maps || []; 
-            state.snoopApiSettings = snoopApiSettings ? { ...INITIAL_STATE.snoopApiSettings, ...snoopApiSettings } : { id: 'main', ...INITIAL_STATE.snoopApiSettings };
+            state.snoopApiSettings = snoopApiSettings ? { ...INITIAL_STATE.snoopApiSettings, ...sanitizeObject(snoopApiSettings) } : { id: 'main', ...INITIAL_STATE.snoopApiSettings };
             state.forumCategories = forumCategories || []; // <-- ✨ 在这里添加新的一行
             state.themePresets = themePresets || [];
                         // ▼▼▼▼▼▼ 把这段新代码粘贴到这里 ▼▼▼▼▼▼
@@ -12511,7 +12587,7 @@ function formatHybridTimeForAI(timestamp) {
                 const cancelBtn = document.getElementById('custom-confirm-cancel-btn');
 
                 titleEl.textContent = title;
-                textEl.innerHTML = message.replace(/\n/g, '<br>'); // 支持换行
+                textEl.innerHTML = escapeHtml(message).replace(/\n/g, '<br>'); // 转义后支持换行
                 modal.style.display = 'flex';
 
                 if (isDanger) {
@@ -12813,8 +12889,32 @@ async function importData(event) {
             }
         }
         
-        // --- 步骤 4: (这是你原有的逻辑，保持不变) ---
+        // --- 步骤 4: 安全清理 + 导入 ---
         //   无论数据来自 .json 还是 .jsonl，到这里 dataToImport 的结构都应该是一致的了
+        //   先对所有导入数据进行原型链污染清理
+        dataToImport = sanitizeObject(dataToImport);
+
+        // 关键表必填字段校验
+        const REQUIRED_FIELDS = {
+            contacts: ['id', 'name'],
+            posts: ['id', 'content', 'author'],
+            worldBooks: ['id', 'name'],
+        };
+
+        for (const [table, fields] of Object.entries(REQUIRED_FIELDS)) {
+            if (Array.isArray(dataToImport[table])) {
+                const before = dataToImport[table].length;
+                dataToImport[table] = dataToImport[table].filter(item => {
+                    const valid = fields.every(f => item && item[f] !== undefined && item[f] !== null);
+                    if (!valid) console.warn(`[导入安全] 过滤无效 ${table} 记录:`, item);
+                    return valid;
+                });
+                if (dataToImport[table].length < before) {
+                    console.warn(`[导入安全] ${table} 过滤了 ${before - dataToImport[table].length} 条无效记录`);
+                }
+            }
+        }
+
         try {
             const supportedStores = Object.keys(dbConfig);
             let importedCount = 0;
@@ -13261,7 +13361,7 @@ function updateWorldBookSelectors() {
         groupedBooks[category].forEach(book => {
             const bookItem = document.createElement('div');
             bookItem.className = 'world-book-item';
-            bookItem.innerHTML = `<input type="checkbox" class="world-book-checkbox" id="book-setting-${book.id}" value="${book.id}"><label for="book-setting-${book.id}" class="world-book-name">${book.name}</label>`;
+            bookItem.innerHTML = `<input type="checkbox" class="world-book-checkbox" id="book-setting-${book.id}" value="${book.id}"><label for="book-setting-${book.id}" class="world-book-name">${escapeHtml(book.name)}</label>`;
             worldBookSelectorList.appendChild(bookItem);
         });
     }
@@ -13343,19 +13443,19 @@ function createPostItem(post, isDetailView = false) {
     if (isDetailView) {
         postItem.innerHTML = `
             <div class="post-delete-btn" data-post-id="${post.id}" title="删除帖子"><i class="fas fa-trash-alt"></i></div>
-            <div class="post-item-avatar"><img src="${authorAvatar}" onerror="this.onerror=null;this.src='https://via.placeholder.com/45/DDD/666?text=U';" alt="${authorName}的头像"></div>
+            <div class="post-item-avatar"><img src="${safeImgSrc(authorAvatar)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/45/DDD/666?text=U';" alt="${escapeHtml(authorName)}的头像"></div>
             <div class="post-content-area">
                 <div>
-                    <span class="post-author-name">${authorName}</span>
-                    ${author.id && !author.id.startsWith('stranger_') ? `<span class="post-author-handle">@${author.id.replace('_','')}</span>` : ''}
+                    <span class="post-author-name">${escapeHtml(authorName)}</span>
+                    ${author.id && !author.id.startsWith('stranger_') ? `<span class="post-author-handle">@${escapeHtml(author.id.replace('_',''))}</span>` : ''}
                 </div>
-                ${ author.signature ? `<div class="post-author-signature">${author.signature}</div>` : '' }
-                <div class="post-text">${parseMentions(post.content.replace(/\n/g, '<br>'))}</div>
-                
+                ${ author.signature ? `<div class="post-author-signature">${escapeHtml(author.signature)}</div>` : '' }
+                <div class="post-text">${parseMentions(post.content)}</div>
+
                 ${imageHTML}
                 ${tagsHTML} <!-- 插入标签 -->
                 ${redPacketHTML}
-                
+
                 <div class="post-meta">${formatTimeAgo(post.timestamp)}</div>
                 <div class="post-actions">
                     <span class="post-action-btn repost-btn" data-post-id="${post.id}"><i class="fas fa-retweet"></i> ${post.reposts > 0 ? post.reposts : '转发'}</span>
@@ -13373,7 +13473,7 @@ function createPostItem(post, isDetailView = false) {
                 ${tagsHTML} <!-- 插入标签 -->
 
                 <div class="post-card-meta-line">
-                    <span class="post-author-info">由 <strong>${authorName}</strong> 发布</span>
+                    <span class="post-author-info">由 <strong>${escapeHtml(authorName)}</strong> 发布</span>
                     <span class="post-meta">${formatTimeAgo(post.timestamp)}</span>
                 </div>
                 ${redPacketHTML}
@@ -13642,35 +13742,57 @@ function openEditEmoticonModal(emoticon) {
     });
 }
 // ==========================================
-// 🚫 API 链接黑名单配置
+// 🚫 API 链接黑名单配置（安全加固版）
 // ==========================================
 
-// 在这里添加你想要禁止的域名或关键词
-const API_BLACKLIST = [
-    "https://api.heibaiwoof.com",       // 示例：禁止某个坏代理
-    "http://hk.heibaiwoof.com/",        // 示例：禁止诈骗API
-    "https://api.heibaiwoof.com/v1",       // 示例：禁止特定IP
-    // "api.openai.com",   // 如果你想禁止直连官方，取消注释这行
+// 黑名单使用纯主机名匹配，避免字符串包含导致的绕过
+const API_BLACKLIST_HOSTS = [
+    "api.heibaiwoof.com",
+    "hk.heibaiwoof.com",
 ];
 
+// 内网 IP 段正则，防止 SSRF 攻击
+const PRIVATE_IP_REGEX = /^(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|169\.254\.\d{1,3}\.\d{1,3}|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|0\.0\.0\.0)$/;
+
 /**
- * 检查 API 地址是否在黑名单中
+ * 检查 API 地址安全性：黑名单 + HTTPS 强制 + 内网 IP 拦截
  * @param {string} url - 用户输入的 URL
- * @returns {boolean} - 如果通过检查返回 true，被拦截返回 false
+ * @returns {boolean} - 通过返回 true，拦截返回 false
  */
 function checkApiUrlValidity(url) {
-    if (!url) return true; // 空地址不归这里管
-    
-    const lowerUrl = url.toLowerCase();
-    
-    for (const forbidden of API_BLACKLIST) {
-        if (lowerUrl.includes(forbidden)) {
-            // 🚨 发现黑名单关键词，弹窗报警
-            alert(`⚠️ 安全警告 ⚠️\n\n该 API 地址包含敏感关键词 "${forbidden}"，已被系统列入黑名单。\n\n禁止连接此地址，请更换其他服务商。`);
-            return false; // 拦截成功
-        }
+    if (!url) return true;
+
+    let parsed;
+    try {
+        // 确保有协议前缀便于解析
+        const normalized = url.match(/^https?:\/\//i) ? url : `https://${url}`;
+        parsed = new URL(normalized);
+    } catch {
+        alert('⚠️ 安全警告 ⚠️\n\nAPI 地址格式无效，请输入合法的 URL。');
+        return false;
     }
-    return true; // 通过检查
+
+    // 1. 黑名单主机名精确匹配
+    const hostname = parsed.hostname.toLowerCase();
+    if (API_BLACKLIST_HOSTS.some(h => hostname === h || hostname.endsWith('.' + h))) {
+        alert(`⚠️ 安全警告 ⚠️\n\n该 API 地址 "${hostname}" 已被列入黑名单。\n\n禁止连接此地址，请更换其他服务商。`);
+        return false;
+    }
+
+    // 2. 强制 HTTPS（localhost/127.0.0.1 开发环境除外）
+    const isLocalDev = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (parsed.protocol !== 'https:' && !isLocalDev) {
+        alert('⚠️ 安全警告 ⚠️\n\nAPI 地址必须使用 HTTPS 协议（开发环境 localhost 除外）。\n\n请使用 https:// 开头的地址。');
+        return false;
+    }
+
+    // 3. 阻止内网 IP 地址（防 SSRF）
+    if (PRIVATE_IP_REGEX.test(hostname)) {
+        alert('⚠️ 安全警告 ⚠️\n\n禁止连接内网地址，请使用公网 API 服务。');
+        return false;
+    }
+
+    return true;
 }
 // --- 表情包批量管理状态 ---
 let isEmoEditMode = false;
@@ -13688,7 +13810,7 @@ async function renderEmoticonLibrary() {
     let tabsHTML = '';
     state.emoticonGroups.forEach(group => {
         const isActive = group.id === activeEmoticonGroupId ? 'active' : '';
-        tabsHTML += `<button class="feed-sub-tab-btn ${isActive} group-tab-btn" data-group-id="${group.id}">${group.name}</button>`;
+        tabsHTML += `<button class="feed-sub-tab-btn ${isActive} group-tab-btn" data-group-id="${group.id}">${escapeHtml(group.name)}</button>`;
     });
     // 在编辑模式下隐藏添加分组按钮，防止误操作
     if (!isEmoEditMode) {
@@ -14050,10 +14172,12 @@ function renderEmoticonPicker() {
 
         function parseMentions(text) {
             if (!text) return '';
+            // 先转义全部内容防止 XSS，再做 @提及 高亮替换，最后处理换行
+            const escaped = escapeHtml(text);
             const mentionRegex = /@([\w\u4e00-\u9fa5]+)/g;
-            return text.replace(mentionRegex, (match) => {
+            return escaped.replace(mentionRegex, (match) => {
                 return `<span class="mention">${match}</span>`;
-            });
+            }).replace(/\n/g, '<br>');
         }
 
        
@@ -14274,7 +14398,7 @@ async function showTrendingTopicScreen(topicTitle, topicDescription) {
                     const entryEl = document.createElement('div');
                     entryEl.className = 'album-memory-item';
                     entryEl.title = new Date(memo.timestamp).toLocaleString();
-                    entryEl.innerHTML = `<i class="fas fa-quote-left"></i> ${memo.description}`;
+                    entryEl.innerHTML = `<i class="fas fa-quote-left"></i> ${escapeHtml(memo.description)}`;
                     gridContent.appendChild(entryEl);
                 });
             }
@@ -15338,7 +15462,7 @@ if (finalBackgroundUrl) {
             let currentScrollHeight = messagesContainer.scrollHeight;
 
 if (!contact || !contact.history || contact.history.length === 0) {
-    messagesContainer.innerHTML = `<div id="chat-placeholder" style="text-align: center; color: #999; padding: 20px;">和 ${contact ? contact.name : ''} 开始聊天吧！</div>`;
+    messagesContainer.innerHTML = `<div id="chat-placeholder" style="text-align: center; color: #999; padding: 20px;">和 ${contact ? escapeHtml(contact.name) : ''} 开始聊天吧！</div>`;
     return;
 }
             
@@ -16035,7 +16159,7 @@ if (message.sender === 'user' && message.type !== 'system_notification') { // 2.
     <img src="${finalAvatarUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/40/DDD/666?text=U';">
 </div>
         <div class="message-body">
-            ${showAuthorName ? `<div class="message-author-name">${finalSenderInfo.name}</div>` : ''}
+            ${showAuthorName ? `<div class="message-author-name">${escapeHtml(finalSenderInfo.name)}</div>` : ''}
             ${messageContentHTML}
             ${transcribedTextHTML}
             <div class="message-timestamp">${message.time}</div>
@@ -18340,9 +18464,14 @@ const NARRATIVE_BASE_PROMPT = `
             const { apiKey, model, endpoint, contextLength, longTermMemoryLength } = apiConfig;
 
             if (!apiKey || !endpoint || !model) {
-                const errorMsg = `错误：${apiType === 'square' ? '论坛' : (apiType === 'snoop' ? '窥探' : '聊天')}API未配置。请前往“发现-API设置”进行配置。`;
+                const errorMsg = `错误：${apiType === 'square' ? '论坛' : (apiType === 'snoop' ? '窥探' : '聊天')}API未配置。请前往”发现-API设置”进行配置。`;
                 console.error(errorMsg);
                 return errorMsg;
+            }
+
+            // 安全校验：验证 API 端点合法性
+            if (!checkApiUrlValidity(endpoint)) {
+                return '错误：API 地址未通过安全校验，请检查设置。';
             }
 
             let chatEndpoint = endpoint;
@@ -21394,7 +21523,7 @@ await createAndAddMessage({
                 if (narrativeText) {
                     const bubble = document.createElement('div');
                     bubble.className = 'char-bubble';
-                    bubble.innerHTML = `<p class="narrative-speech">“${narrativeText}”</p>`;
+                    bubble.innerHTML = `<p class=”narrative-speech”>”${escapeHtml(narrativeText)}”</p>`;
                     narrativeFeed.appendChild(bubble);
                     narrativeFeed.scrollTop = narrativeFeed.scrollHeight;
                     await sleep(1000);
@@ -21644,7 +21773,7 @@ const commandRegex = /\[\s*(sticker|voice|picture|red_packet|transfer|transfer_t
                         if (wrapperToUpdate) {
                             const contactResultRow = wrapperToUpdate.querySelectorAll('.wheel-result-row')[1];
                             if (contactResultRow) {
-                                contactResultRow.innerHTML = `<span class="wheel-player-name">${contactName}</span> <div class="wheel-player-result">${result.trim()}</div>`;
+                                contactResultRow.innerHTML = `<span class="wheel-player-name">${escapeHtml(contactName)}</span> <div class="wheel-player-result">${escapeHtml(result.trim())}</div>`;
                             }
                         }
                         continue; // (指令处理完成，跳过)
@@ -21791,7 +21920,7 @@ const commandRegex = /\[\s*(sticker|voice|picture|red_packet|transfer|transfer_t
             // 更新第二行（AI/对方 的结果行）
             const contactResultRow = wrapperToUpdate.querySelectorAll('.wheel-result-row')[1];
             if (contactResultRow) {
-                contactResultRow.innerHTML = `<span class="wheel-player-name">${senderProfile.name}</span> <div class="wheel-player-result" style="background:#E6F3FF; color:#006BB3;">${result}</div>`;
+                contactResultRow.innerHTML = `<span class="wheel-player-name">${escapeHtml(senderProfile.name)}</span> <div class="wheel-player-result" style="background:#E6F3FF; color:#006BB3;">${escapeHtml(result)}</div>`;
             }
         }
         
@@ -22337,14 +22466,14 @@ case 'takeout': {
                     
                     commentEl.innerHTML = `
                         <div style="display: flex; gap: 10px;">
-                            <img src="${author.avatar}" style="width: 35px; height: 35px; border-radius: 50%;">
+                            <img src="${safeImgSrc(author.avatar)}" style="width: 35px; height: 35px; border-radius: 50%;">
                             <div style="flex-grow: 1;">
                                 <div>
-                                    <span class="comment-author">${author.name}</span>
-                                    ${comment.replyTo ? `<span class="comment-reply-to">回复 @${comment.replyTo}</span>` : ''}
+                                    <span class="comment-author">${escapeHtml(author.name)}</span>
+                                    ${comment.replyTo ? `<span class="comment-reply-to">回复 @${escapeHtml(comment.replyTo)}</span>` : ''}
                                 </div>
                                 <div class="comment-content">${parseMentions(comment.content)}</div>
-                                
+
                                 ${commentImageHTML} <div class="comment-meta">
                                     <span>${formatTimeAgo(comment.timestamp)}</span>
                                     <span class="comment-delete-btn" data-comment-id="${comment.id}"><i class="fas fa-trash-alt"></i> 删除</span>
@@ -22542,7 +22671,7 @@ async function sendVideoCallMessage() {
     await createAndAddMessage({ type: 'video_call_text', content: content }, 'user', contact, false, 'chat');
 
     const narrativeFeed = document.getElementById('narrative-feed');
-    narrativeFeed.innerHTML += `<div class="user-message"><p>${content}</p></div>`;
+    narrativeFeed.innerHTML += `<div class="user-message"><p>${escapeHtml(content)}</p></div>`;
     narrativeFeed.scrollTop = narrativeFeed.scrollHeight;
     input.value = '';
     
@@ -22917,7 +23046,7 @@ async function switchForumArchive(archiveId) {
         archiveName = archive.name;
     }
 
-    state.forumSettings = Object.assign({}, state.forumSettings, settingsToRestore);
+    state.forumSettings = Object.assign({}, state.forumSettings, sanitizeObject(settingsToRestore));
     await timiMemory.put('forumSettings', { id: 'main', ...state.forumSettings });
 
     // 更新 state，标记当前激活的世界线ID
@@ -25297,7 +25426,7 @@ html += musicData.recently_played.map((song, index) => {
 
     } catch (e) {
         console.error("渲染窥探内容失败:", e);
-        bodyEl.innerHTML = `<p style="text-align:center; color:var(--soft-red); padding: 20px;">内容格式错误或数据不完整，无法显示。<br><small>${e.message}</small></p>`;
+        bodyEl.innerHTML = `<p style="text-align:center; color:var(--soft-red); padding: 20px;">内容格式错误或数据不完整，无法显示。<br><small>${escapeHtml(e.message)}</small></p>`;
     }
 }
 // ▲▲▲ 替换 displaySnoopContent 结束 ▲▲▲
@@ -25452,14 +25581,14 @@ function renderMapIcons() {
             
             iconEl.innerHTML = `
                 <i class="${loc.icon || 'fas fa-map-marker-alt'}" style="color: ${loc.color || '#333'}"></i>
-                <span class="map-icon-label">${loc.name}</span>
+                <span class="map-icon-label">${escapeHtml(loc.name)}</span>
             `;
             container.appendChild(iconEl);
 
             // --- B. 渲染右上角的目录项 ---
             const dirItem = document.createElement('div');
             dirItem.className = 'directory-item';
-            dirItem.innerHTML = `<i class="${loc.icon || 'fas fa-map-marker-alt'}"></i><span>${loc.name}</span>`;
+            dirItem.innerHTML = `<i class="${loc.icon || 'fas fa-map-marker-alt'}"></i><span>${escapeHtml(loc.name)}</span>`;
             
             // 点击目录：定位并高亮
             dirItem.addEventListener('click', () => {
@@ -26124,7 +26253,7 @@ async function showGroupSelectorModal(contactId) {
     allGroups.forEach(group => {
         const groupItem = document.createElement('div');
         groupItem.className = 'contact-picker-item';
-        groupItem.innerHTML = `<label style="width: 100%; cursor: pointer;"><input type="radio" name="group-select" value="${group.id}" ${contact.groupId === group.id ? 'checked' : ''}> ${group.name}</label>`;
+        groupItem.innerHTML = `<label style="width: 100%; cursor: pointer;"><input type="radio" name="group-select" value="${group.id}" ${contact.groupId === group.id ? 'checked' : ''}> ${escapeHtml(group.name)}</label>`;
         groupItem.addEventListener('click', () => moveContactToGroup(contactId, group.id));
         listEl.appendChild(groupItem);
     });
@@ -29544,10 +29673,15 @@ async function callGameAI(systemPrompt) {
     const { apiKey, model, endpoint } = apiConfig;
 
     if (!apiKey || !endpoint || !model) {
-        const errorMsg = "错误：游戏无法启动，因为【聊天API设置】未配置。请前往“发现-API设置”进行配置。";
+        const errorMsg = “错误：游戏无法启动，因为【聊天API设置】未配置。请前往”发现-API设置”进行配置。”;
         console.error(errorMsg);
         alert(errorMsg);
         throw new Error(errorMsg);
+    }
+
+    // 安全校验：验证 API 端点合法性
+    if (!checkApiUrlValidity(endpoint)) {
+        throw new Error('API 地址未通过安全校验');
     }
 
     const bodyPayload = {
@@ -36248,7 +36382,7 @@ const comments = commentLines.map(line => {
     const recipientListEl = document.getElementById('share-product-recipient-list');
     
     document.getElementById('share-product-message-input').value = '';
-    infoEl.innerHTML = `即将分享: <strong>${product.name}</strong><br><span style="color: #888;">价格: ¥${product.price}</span>`;
+    infoEl.innerHTML = `即将分享: <strong>${escapeHtml(product.name)}</strong><br><span style="color: #888;">价格: ¥${escapeHtml(String(product.price))}</span>`;
     
     // ▼▼▼ 核心新增逻辑 ▼▼▼
     recipientListEl.innerHTML = ''; // 先清空旧列表
@@ -36336,7 +36470,7 @@ async function renderForumSettingsUI() {
             const isChecked = state.forumSettings.worldBookIds.includes(book.id);
             const bookItem = document.createElement('div');
             bookItem.className = 'world-book-item';
-            bookItem.innerHTML = `<input type="checkbox" class="world-book-checkbox" id="forum-book-${book.id}" value="${book.id}" ${isChecked ? 'checked' : ''}><label for="forum-book-${book.id}" class="world-book-name">${book.name}</label>`;
+            bookItem.innerHTML = `<input type="checkbox" class="world-book-checkbox" id="forum-book-${book.id}" value="${book.id}" ${isChecked ? 'checked' : ''}><label for="forum-book-${book.id}" class="world-book-name">${escapeHtml(book.name)}</label>`;
             worldBookList.appendChild(bookItem);
         });
     } else {
@@ -36675,7 +36809,7 @@ function openGroupSettingsScreen(group) {
         const isChecked = group.worldBooks && group.worldBooks.includes(book.id);
         const bookItem = document.createElement('div');
         bookItem.className = 'world-book-item';
-        bookItem.innerHTML = `<input type="checkbox" class="world-book-checkbox" id="group-book-${book.id}" value="${book.id}" ${isChecked ? 'checked' : ''}><label for="group-book-${book.id}" class="world-book-name">${book.name}</label>`;
+        bookItem.innerHTML = `<input type="checkbox" class="world-book-checkbox" id="group-book-${book.id}" value="${book.id}" ${isChecked ? 'checked' : ''}><label for="group-book-${book.id}" class="world-book-name">${escapeHtml(book.name)}</label>`;
         worldBookList.appendChild(bookItem);
     });
 
@@ -37423,7 +37557,7 @@ state.worldBooks.forEach(book => { // 遍历所有可用的世界书
     const bookItem = document.createElement('div');
     bookItem.className = 'world-book-item'; // 复用样式
     // 创建复选框和标签，根据 isChecked 决定是否默认勾选
-    bookItem.innerHTML = `<input type="checkbox" class="world-book-checkbox" id="snoop-book-setting-${book.id}" value="${book.id}" ${isChecked ? 'checked' : ''}><label for="snoop-book-setting-${book.id}" class="world-book-name">${book.name}</label>`;
+    bookItem.innerHTML = `<input type="checkbox" class="world-book-checkbox" id="snoop-book-setting-${book.id}" value="${book.id}" ${isChecked ? 'checked' : ''}><label for="snoop-book-setting-${book.id}" class="world-book-name">${escapeHtml(book.name)}</label>`;
     snoopWorldBookList.appendChild(bookItem); // 将创建好的条目添加到新的列表容器中
 });
         document.getElementById('narrative-mode-toggle').checked = contact.isNarrativeMode;
