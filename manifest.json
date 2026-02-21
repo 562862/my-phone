@@ -1,0 +1,19 @@
+{
+  "name": "Timi小手机",
+  "short_name": "Timi",
+  "description": "Timi小手机（PWA）",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00A4FF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
