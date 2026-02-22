@@ -5,8 +5,9 @@ WORKDIR /app/server
 # 先复制 Prisma schema（postinstall 的 prisma generate 需要它）
 COPY server/prisma ./prisma
 
-# 安装依赖
+# 安装依赖（设置占位 DATABASE_URL，prisma generate 构建时需要）
 COPY server/package*.json ./
+ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 RUN npm ci --omit=dev
 
 # 复制后端代码
