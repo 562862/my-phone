@@ -1,3 +1,5 @@
 {
-  "static": true
+  "build_command": "cd server && npm install",
+  "start_command": "cd server && npx prisma db push --skip-generate && node src/index.js",
+  "root_directory": "."
 }

@@ -7317,9 +7317,62 @@ input:checked + .mini-slider:before { transform: translateX(16px); }
 .assoc-content { flex: 1; }
 .assoc-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .assoc-desc { font-size: 12px; color: #888; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* ===== 认证页面样式 ===== */
+#auth-screen {
+  position: fixed; inset: 0; z-index: 99999;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex; justify-content: center; align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+#auth-screen.hidden { display: none; }
+.auth-card {
+  background: rgba(255,255,255,.95); border-radius: 20px; padding: 36px 28px;
+  width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,.3); backdrop-filter: blur(10px);
+}
+.auth-card h2 { text-align: center; margin-bottom: 6px; font-size: 22px; color: #333; }
+.auth-card .subtitle { text-align: center; color: #999; font-size: 13px; margin-bottom: 24px; }
+.auth-input { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; outline: none; margin-bottom: 14px; transition: border .2s; box-sizing: border-box; }
+.auth-input:focus { border-color: #667eea; }
+.auth-btn { width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+.auth-btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.auth-btn-primary:hover { opacity: .9; }
+.auth-switch { text-align: center; margin-top: 16px; font-size: 13px; color: #999; }
+.auth-switch a { color: #667eea; cursor: pointer; text-decoration: none; font-weight: 500; }
+.auth-error { color: #e74c3c; font-size: 13px; text-align: center; margin-bottom: 12px; min-height: 18px; }
+.auth-sync-status { position: fixed; top: 12px; right: 12px; z-index: 99998; padding: 6px 14px; border-radius: 16px; font-size: 12px; background: rgba(0,0,0,.6); color: #fff; display: none; }
+.auth-sync-status.show { display: block; }
 </style>
 </head>
 <body>
+    <!-- 认证页面 -->
+    <div id="auth-screen">
+      <div class="auth-card">
+        <!-- 登录表单 -->
+        <div id="auth-login-form">
+          <h2>Timi 小手机</h2>
+          <p class="subtitle">登录你的账号</p>
+          <div class="auth-error" id="login-error"></div>
+          <input class="auth-input" id="auth-login-user" type="text" placeholder="用户名" autocomplete="username">
+          <input class="auth-input" id="auth-login-pass" type="password" placeholder="密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')window._authManager.login()">
+          <button class="auth-btn auth-btn-primary" id="auth-login-btn" onclick="window._authManager.login()">登录</button>
+          <div class="auth-switch">还没有账号？<a onclick="window._authManager.showRegister()">注册</a></div>
+        </div>
+        <!-- 注册表单 -->
+        <div id="auth-register-form" style="display:none">
+          <h2>创建账号</h2>
+          <p class="subtitle">需要邀请码注册</p>
+          <div class="auth-error" id="register-error"></div>
+          <input class="auth-input" id="auth-reg-user" type="text" placeholder="用户名（2-20字符）" autocomplete="username">
+          <input class="auth-input" id="auth-reg-pass" type="password" placeholder="密码（至少6位）" autocomplete="new-password">
+          <input class="auth-input" id="auth-reg-code" type="text" placeholder="邀请码" onkeydown="if(event.key==='Enter')window._authManager.register()">
+          <button class="auth-btn auth-btn-primary" id="auth-reg-btn" onclick="window._authManager.register()">注册</button>
+          <div class="auth-switch">已有账号？<a onclick="window._authManager.showLogin()">登录</a></div>
+        </div>
+      </div>
+    </div>
+    <!-- 同步状态提示 -->
+    <div class="auth-sync-status" id="sync-status"></div>
+
     <div id="app-container">
         <div id="screen">
             <div id="main-screen">
@@ -11850,6 +11903,232 @@ const dbConfig = {
 // ▼▼▼ 把这里的版本号数字加 1 (例如 13 -> 19) ▼▼▼
 const timiMemory = new AppStorage('AppleNarrativeDB_Native_V1', 24, dbConfig);
 // ▲▲▲ 版本号修改结束 ▲▲▲
+
+    // ===================================================================
+    // 3.0 云端同步与认证模块
+    // ===================================================================
+    const API_BASE = location.origin;
+
+    // 需要同步的 store 列表
+    const SYNC_STORES = ['contacts', 'worldBooks', 'userPersonaPresets', 'thoughtPresets', 'myProfile'];
+
+    // SyncManager：负责数据同步
+    class SyncManager {
+      constructor() {
+        this._version = 0;
+        this._timer = null;
+        this._pushing = false;
+      }
+
+      getToken() { return localStorage.getItem('timi_token'); }
+
+      async _fetch(path, opts = {}) {
+        const token = this.getToken();
+        if (!token) throw new Error('未登录');
+        const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+        const res = await fetch(API_BASE + path, { ...headers, ...opts, headers });
+        if (res.status === 401) {
+          const data = await res.json().catch(() => ({}));
+          if (data.code === 'KICKED') {
+            this._onKicked();
+          } else {
+            this._onAuthFail();
+          }
+          throw new Error(data.error || '认证失败');
+        }
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || '请求失败');
+        }
+        return res.json();
+      }
+
+      // 拉取云端数据 → 写入 IndexedDB
+      async pull() {
+        try {
+          const data = await this._fetch('/api/sync/pull');
+          this._version = data.version || 0;
+
+          // 写入 IndexedDB（整体替换）
+          if (data.contacts && Array.isArray(data.contacts) && data.contacts.length > 0) {
+            await timiMemory.clear('contacts');
+            await timiMemory.bulkPut('contacts', data.contacts);
+          }
+          if (data.worldBooks && Array.isArray(data.worldBooks) && data.worldBooks.length > 0) {
+            await timiMemory.clear('worldBooks');
+            await timiMemory.bulkPut('worldBooks', data.worldBooks);
+          }
+          if (data.userPersonaPresets && Array.isArray(data.userPersonaPresets) && data.userPersonaPresets.length > 0) {
+            await timiMemory.clear('userPersonaPresets');
+            await timiMemory.bulkPut('userPersonaPresets', data.userPersonaPresets);
+          }
+          if (data.thoughtPresets && Array.isArray(data.thoughtPresets) && data.thoughtPresets.length > 0) {
+            await timiMemory.clear('thoughtPresets');
+            await timiMemory.bulkPut('thoughtPresets', data.thoughtPresets);
+          }
+          if (data.myProfile && typeof data.myProfile === 'object' && Object.keys(data.myProfile).length > 0) {
+            await timiMemory.put('myProfile', { id: 'main', ...data.myProfile });
+          }
+
+          console.log('[Sync] 拉取完成, version:', this._version);
+          return true;
+        } catch (e) {
+          console.error('[Sync] 拉取失败:', e.message);
+          return false;
+        }
+      }
+
+      // 推送本地数据到云端
+      async push() {
+        if (this._pushing) return;
+        this._pushing = true;
+        try {
+          const [contacts, worldBooks, userPersonaPresets, thoughtPresets, myProfile] = await Promise.all([
+            timiMemory.getAll('contacts'),
+            timiMemory.getAll('worldBooks'),
+            timiMemory.getAll('userPersonaPresets'),
+            timiMemory.getAll('thoughtPresets'),
+            timiMemory.get('myProfile', 'main'),
+          ]);
+
+          const data = await this._fetch('/api/sync/push', {
+            method: 'POST',
+            body: JSON.stringify({
+              contacts, worldBooks, userPersonaPresets, thoughtPresets,
+              myProfile: myProfile || {},
+              version: this._version,
+            }),
+          });
+
+          this._version = data.version;
+          this._showStatus('已同步');
+          console.log('[Sync] 推送完成, version:', this._version);
+        } catch (e) {
+          if (e.message.includes('冲突')) {
+            // 版本冲突，重新拉取
+            console.warn('[Sync] 版本冲突，重新拉取');
+            await this.pull();
+          } else {
+            console.error('[Sync] 推送失败:', e.message);
+          }
+        } finally {
+          this._pushing = false;
+        }
+      }
+
+      // 启动自动同步（30秒定时 + 页面切后台时）
+      startAutoSync() {
+        this.stopAutoSync();
+        this._timer = setInterval(() => this.push(), 30000);
+        document.addEventListener('visibilitychange', this._onVisChange = () => {
+          if (document.visibilityState === 'hidden') this.push();
+        });
+        // 页面关闭前同步
+        window.addEventListener('beforeunload', this._onUnload = () => this.push());
+      }
+
+      stopAutoSync() {
+        if (this._timer) { clearInterval(this._timer); this._timer = null; }
+        if (this._onVisChange) document.removeEventListener('visibilitychange', this._onVisChange);
+        if (this._onUnload) window.removeEventListener('beforeunload', this._onUnload);
+      }
+
+      _showStatus(msg) {
+        const el = document.getElementById('sync-status');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2000);
+      }
+
+      _onKicked() {
+        this.stopAutoSync();
+        localStorage.removeItem('timi_token');
+        alert('你的账号已在其他设备登录，当前设备已下线。');
+        location.reload();
+      }
+
+      _onAuthFail() {
+        this.stopAutoSync();
+        localStorage.removeItem('timi_token');
+        location.reload();
+      }
+    }
+
+    const syncManager = new SyncManager();
+
+    // AuthManager：负责登录/注册 UI 交互
+    window._authManager = {
+      showLogin() {
+        document.getElementById('auth-login-form').style.display = 'block';
+        document.getElementById('auth-register-form').style.display = 'none';
+        document.getElementById('login-error').textContent = '';
+      },
+      showRegister() {
+        document.getElementById('auth-login-form').style.display = 'none';
+        document.getElementById('auth-register-form').style.display = 'block';
+        document.getElementById('register-error').textContent = '';
+      },
+      async login() {
+        const username = document.getElementById('auth-login-user').value.trim();
+        const password = document.getElementById('auth-login-pass').value;
+        const errEl = document.getElementById('login-error');
+        errEl.textContent = '';
+        if (!username || !password) { errEl.textContent = '请输入用户名和密码'; return; }
+        try {
+          document.getElementById('auth-login-btn').disabled = true;
+          document.getElementById('auth-login-btn').textContent = '登录中...';
+          const res = await fetch(API_BASE + '/api/auth/login', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json();
+          if (!res.ok) { errEl.textContent = data.error || '登录失败'; return; }
+          localStorage.setItem('timi_token', data.token);
+          localStorage.setItem('timi_user', JSON.stringify(data.user));
+          await this._enterApp();
+        } catch (e) {
+          errEl.textContent = '网络错误，请重试';
+        } finally {
+          const btn = document.getElementById('auth-login-btn');
+          if (btn) { btn.disabled = false; btn.textContent = '登录'; }
+        }
+      },
+      async register() {
+        const username = document.getElementById('auth-reg-user').value.trim();
+        const password = document.getElementById('auth-reg-pass').value;
+        const inviteCode = document.getElementById('auth-reg-code').value.trim();
+        const errEl = document.getElementById('register-error');
+        errEl.textContent = '';
+        if (!username || !password || !inviteCode) { errEl.textContent = '请填写所有字段'; return; }
+        try {
+          document.getElementById('auth-reg-btn').disabled = true;
+          document.getElementById('auth-reg-btn').textContent = '注册中...';
+          const res = await fetch(API_BASE + '/api/auth/register', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, inviteCode }),
+          });
+          const data = await res.json();
+          if (!res.ok) { errEl.textContent = data.error || '注册失败'; return; }
+          localStorage.setItem('timi_token', data.token);
+          localStorage.setItem('timi_user', JSON.stringify(data.user));
+          await this._enterApp();
+        } catch (e) {
+          errEl.textContent = '网络错误，请重试';
+        } finally {
+          const btn = document.getElementById('auth-reg-btn');
+          if (btn) { btn.disabled = false; btn.textContent = '注册'; }
+        }
+      },
+      async _enterApp() {
+        // 占位：会在 DOMContentLoaded 内部被覆盖
+        document.getElementById('auth-screen').classList.add('hidden');
+        await syncManager.pull();
+        location.reload();
+      }
+    };
+
+    // ===================================================================
 
     // --------------------------------------------------------------------
     // 3. 应用主逻辑 
@@ -35691,6 +35970,35 @@ function updatePreview(type, value, value2 = '') {
 // ▲▲▲ 粘贴到这里结束 ▲▲▲
         async function initApp() {
             await timiMemory.init();
+
+            // ===== 认证检查：有 token 则验证并同步，无 token 则等待登录 =====
+            const savedToken = localStorage.getItem('timi_token');
+            if (savedToken) {
+              try {
+                // 验证 token 有效性
+                const meRes = await fetch(API_BASE + '/api/auth/me', {
+                  headers: { 'Authorization': 'Bearer ' + savedToken }
+                });
+                if (meRes.ok) {
+                  // token 有效，拉取云端数据
+                  await syncManager.pull();
+                  document.getElementById('auth-screen').classList.add('hidden');
+                } else {
+                  // token 无效，清除并显示登录页
+                  localStorage.removeItem('timi_token');
+                  localStorage.removeItem('timi_user');
+                  return; // 等待用户登录，_enterApp 会重新调用 loadDataFromDB
+                }
+              } catch (e) {
+                // 网络错误，使用本地数据继续（离线模式）
+                console.warn('[Auth] 网络不可用，使用本地数据');
+                document.getElementById('auth-screen').classList.add('hidden');
+              }
+            } else {
+              // 无 token，显示登录页，等待用户操作
+              return; // _enterApp 会在登录后调用 loadDataFromDB
+            }
+
             await loadSnoopDataCache();
             await loadDataFromDB();
             await loadAppearanceSettings();
@@ -35716,6 +36024,11 @@ if (userSettings.qzoneSettings && userSettings.qzoneSettings.autoRefreshEnabled)
             }
             showLockScreen();
             // ▲▲▲ 新代码添加结束 ▲▲▲
+
+            // 启动云端自动同步
+            if (localStorage.getItem('timi_token')) {
+              syncManager.startAutoSync();
+            }
         }
 
         // (替换原有的 renderPet 函数)
@@ -42278,6 +42591,27 @@ attachEventListeners();
     window.acceptAiSurvey = acceptAiSurvey;
 
     console.log("✅ 默契挑战功能已手动挂载到全局！");
+
+    // ===== 覆盖 _enterApp：登录/注册后进入应用 =====
+    window._authManager._enterApp = async function() {
+      document.getElementById('auth-screen').classList.add('hidden');
+      await syncManager.pull();
+      await loadSnoopDataCache();
+      await loadDataFromDB();
+      await loadAppearanceSettings();
+      await renderMyProfile();
+      await renderContacts();
+      await renderWorldBooks();
+      await updateWorldBookSelectors();
+      await renderUserPersonaPresets();
+      await renderThoughtPresets();
+      updateNotificationDots();
+      renderAttachmentMenu();
+      await showMainScreen();
+      showLockScreen();
+      syncManager.startAutoSync();
+    };
+
 await initApp();
 }); 
 </script>

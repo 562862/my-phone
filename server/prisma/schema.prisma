@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(uuid())
+  username     String      @unique
+  passwordHash String
+  role         String      @default("user") // "user" | "admin"
+  status       String      @default("active") // "active" | "banned"
+  tokenVersion Int         @default(0) // 递增踢前设备
+  inviteCodeId String?     @unique
+  inviteCode   InviteCode? @relation(fields: [inviteCodeId], references: [id])
+  syncData     SyncData?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model InviteCode {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  used      Boolean   @default(false)
+  usedBy    User?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+}
+
+model SyncData {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contacts          Json     @default("[]")
+  worldBooks        Json     @default("[]")
+  userPersonaPresets Json    @default("[]")
+  thoughtPresets    Json     @default("[]")
+  myProfile         Json     @default("{}")
+  version           Int      @default(0) // 乐观锁版本号
+  updatedAt         DateTime @updatedAt
+}
