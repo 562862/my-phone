@@ -39,6 +39,38 @@
             --shadow-color: rgba(0, 164, 255, 0.08);
             --soft-radius: 16px;
             --card-background: rgba(255, 255, 255, 0.7);
+
+            /* === 手机主题变量 === */
+            --phone-shell-bg: linear-gradient(145deg, #1a3a5c 0%, #0d2137 50%, #1a3a5c 100%);
+            --phone-shell-border: #2a5a8a;
+            --phone-shell-radius: 44px;
+            --phone-shell-padding: 12px;
+            --phone-shell-shadow: 0 25px 80px rgba(0,0,0,0.45), 0 8px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            --phone-screen-radius: 36px;
+            --wallpaper-bg: linear-gradient(160deg, #0a1628 0%, #0f2847 30%, #1a4a7a 60%, #2d6aa0 80%, #4a90c4 100%);
+            --icon-radius: 22%;
+            --icon-size: 60px;
+            --icon-gap: 16px;
+            --icon-label-color: #fff;
+            --icon-label-shadow: 0 1px 3px rgba(0,0,0,0.6);
+            --status-bar-color: #fff;
+            --status-bar-height: 44px;
+            --dock-bg: rgba(255,255,255,0.12);
+            --dock-blur: 20px;
+            --dock-border: rgba(255,255,255,0.15);
+            --dock-height: 84px;
+            --page-indicator-color: rgba(255,255,255,0.35);
+            --page-indicator-active: #fff;
+            --home-screen-padding-top: 20px;
+
+            /* === 微信主题变量 === */
+            --wechat-nav-bg: rgba(0, 164, 255, 0.75);
+            --wechat-nav-text: #fff;
+            --wechat-chat-bg: #f0f0f0;
+            --wechat-bubble-sent: #E6F3FF;
+            --wechat-bubble-received: #fff;
+            --wechat-bubble-radius: 22px;
+            --wechat-font-size: 15px;
         }
         
        /* --- 您新增的叙事模式美化样式 --- */
@@ -79,7 +111,7 @@
 }
         
         body {
-            background-image: linear-gradient(to bottom, var(--background-start), var(--background-end));
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -90,6 +122,11 @@
             width: 100%;
             height: 100%;
             background-color: transparent;
+        }
+
+        /* 应用容器作为覆盖层 */
+        #app-container.app-screen-layer {
+            background: linear-gradient(to bottom, var(--background-start), var(--background-end));
         }
         
         #screen {
@@ -7319,61 +7356,488 @@ input:checked + .mini-slider:before { transform: translateX(16px); }
 .assoc-desc { font-size: 12px; color: #888; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 /* ===== 认证页面样式 ===== */
 #auth-screen {
-  position: fixed; inset: 0; z-index: 99999;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: absolute; inset: 0; z-index: 500;
+  background: linear-gradient(160deg, #0a1628 0%, #0f2847 30%, #1a4a7a 60%, #2d6aa0 80%, #4a90c4 100%);
   display: flex; justify-content: center; align-items: center;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  border-radius: var(--phone-screen-radius);
 }
 #auth-screen.hidden { display: none; }
 .auth-card {
-  background: rgba(255,255,255,.95); border-radius: 20px; padding: 36px 28px;
-  width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,.3); backdrop-filter: blur(10px);
+  background: rgba(255,255,255,.12); border-radius: 24px; padding: 36px 28px;
+  width: 300px; box-shadow: 0 20px 60px rgba(0,0,0,.3); backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.15);
 }
-.auth-card h2 { text-align: center; margin-bottom: 6px; font-size: 22px; color: #333; }
-.auth-card .subtitle { text-align: center; color: #999; font-size: 13px; margin-bottom: 24px; }
-.auth-input { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; outline: none; margin-bottom: 14px; transition: border .2s; box-sizing: border-box; }
-.auth-input:focus { border-color: #667eea; }
+.auth-card h2 { text-align: center; margin-bottom: 6px; font-size: 22px; color: #fff; }
+.auth-card .subtitle { text-align: center; color: rgba(255,255,255,.6); font-size: 13px; margin-bottom: 24px; }
+.auth-input { width: 100%; padding: 12px 14px; border: 1.5px solid rgba(255,255,255,.2); border-radius: 12px; font-size: 15px; outline: none; margin-bottom: 14px; transition: border .2s; box-sizing: border-box; background: rgba(255,255,255,.08); color: #fff; }
+.auth-input:focus { border-color: rgba(100,180,255,.6); background: rgba(255,255,255,.12); }
 .auth-btn { width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
-.auth-btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.auth-btn-primary { background: linear-gradient(135deg, #4a90c4, #2d6aa0); color: #fff; }
 .auth-btn-primary:hover { opacity: .9; }
-.auth-switch { text-align: center; margin-top: 16px; font-size: 13px; color: #999; }
-.auth-switch a { color: #667eea; cursor: pointer; text-decoration: none; font-weight: 500; }
+.auth-switch { text-align: center; margin-top: 16px; font-size: 13px; color: rgba(255,255,255,.5); }
+.auth-switch a { color: #64D2FF; cursor: pointer; text-decoration: none; font-weight: 500; }
 .auth-error { color: #e74c3c; font-size: 13px; text-align: center; margin-bottom: 12px; min-height: 18px; }
-.auth-sync-status { position: fixed; top: 12px; right: 12px; z-index: 99998; padding: 6px 14px; border-radius: 16px; font-size: 12px; background: rgba(0,0,0,.6); color: #fff; display: none; }
+.auth-sync-status { position: absolute; top: 12px; right: 12px; z-index: 501; padding: 6px 14px; border-radius: 16px; font-size: 12px; background: rgba(0,0,0,.6); color: #fff; display: none; }
 .auth-sync-status.show { display: block; }
+
+/* ============================================================
+   手机壳 + 主屏幕 样式系统 (Phase 1 Redesign)
+   ============================================================ */
+
+
+/* --- 底部回到桌面指示条 --- */
+#home-indicator-bar {
+    position: fixed;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    cursor: pointer;
+    padding: 4px 20px;
+    -webkit-tap-highlight-color: transparent;
+}
+.home-indicator-pill {
+    width: 134px;
+    height: 5px;
+    background: rgba(255,255,255,0.35);
+    border-radius: 100px;
+    transition: background 0.2s, width 0.2s;
+}
+#home-indicator-bar:hover .home-indicator-pill {
+    background: rgba(255,255,255,0.6);
+    width: 150px;
+}
+
+/* --- 手机外壳 --- */
+#phone-shell {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 430px;
+    max-height: 932px;
+    background: var(--phone-shell-bg);
+    border-radius: var(--phone-shell-radius);
+    padding: var(--phone-shell-padding);
+    box-shadow: var(--phone-shell-shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+#phone-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--phone-shell-radius);
+    border: 1px solid rgba(255,255,255,0.08);
+    pointer-events: none;
+    z-index: 1;
+}
+#phone-shell::after {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: 140px;
+    width: 4px;
+    height: 60px;
+    background: linear-gradient(180deg, #2a5a8a, #1a3a5c, #2a5a8a);
+    border-radius: 0 3px 3px 0;
+    z-index: 2;
+}
+
+/* --- 手机内屏 --- */
+#phone-inner-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--phone-screen-radius);
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- 状态栏 --- */
+#status-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: var(--status-bar-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    color: var(--status-bar-color);
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 200;
+    pointer-events: none;
+    font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+}
+#status-bar-time { font-size: 15px; font-weight: 700; letter-spacing: 0.3px; }
+#status-bar-icons { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+#status-bar-icons i { font-size: 14px; }
+.status-battery { display: flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; }
+.status-battery-icon {
+    width: 24px; height: 12px;
+    border: 1.5px solid currentColor;
+    border-radius: 3px;
+    position: relative;
+    display: flex; align-items: center; padding: 1.5px;
+}
+.status-battery-icon::after {
+    content: '';
+    position: absolute; right: -4px; top: 50%;
+    transform: translateY(-50%);
+    width: 2px; height: 5px;
+    background: currentColor;
+    border-radius: 0 1px 1px 0;
+}
+.status-battery-level { height: 100%; width: 75%; background: currentColor; border-radius: 1px; }
+
+/* --- 灵动岛 --- */
+#dynamic-island {
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 34px;
+    background: #0a0a0a;
+    border-radius: 20px;
+    z-index: 210;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#dynamic-island::before {
+    content: '';
+    width: 10px; height: 10px;
+    background: radial-gradient(circle, #1a1a2e 30%, #0a0a0a 70%);
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+/* --- 主屏幕 --- */
+#home-screen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--wallpaper-bg);
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+#home-screen.hidden { opacity: 0; transform: scale(0.92); pointer-events: none; }
+#home-screen.app-active { transform: scale(0.88); opacity: 0.6; border-radius: 20px; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
+
+/* --- 图标页面容器 --- */
+#home-pages-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    padding-top: calc(var(--status-bar-height) + var(--home-screen-padding-top));
+}
+#home-pages-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+#home-pages-track.swiping { transition: none; }
+.home-page {
+    min-width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, auto);
+    align-content: start;
+    gap: var(--icon-gap) 0;
+    padding: 10px 16px;
+    box-sizing: border-box;
+}
+
+/* --- 应用图标 --- */
+.app-icon-item {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: transform 0.15s ease;
+}
+.app-icon-item:active { transform: scale(0.88); }
+.app-icon-box {
+    width: var(--icon-size); height: var(--icon-size);
+    border-radius: var(--icon-radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; color: #fff;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.app-icon-box::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0.05) 100%);
+    pointer-events: none;
+}
+.app-icon-box::after {
+    content: '';
+    position: absolute; top: 0; left: 10%; right: 10%; height: 45%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+    border-radius: 0 0 50% 50%;
+    pointer-events: none;
+}
+.app-icon-label {
+    font-size: 11px; color: var(--icon-label-color);
+    text-shadow: var(--icon-label-shadow);
+    text-align: center; max-width: 70px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-weight: 500; letter-spacing: 0.2px;
+}
+
+/* 图标颜色 */
+.icon-wechat { background: linear-gradient(135deg, #07C160, #06AD56); }
+.icon-sms { background: linear-gradient(135deg, #34C759, #28A745); }
+.icon-music { background: linear-gradient(135deg, #FC3C44, #D42A32); }
+.icon-worldbook { background: linear-gradient(135deg, #FF9500, #E08600); }
+.icon-snoop { background: linear-gradient(135deg, #5856D6, #4A48C4); }
+.icon-map { background: linear-gradient(135deg, #30D158, #28B84C); }
+.icon-calendar { background: linear-gradient(135deg, #FF3B30, #D63028); }
+.icon-album { background: linear-gradient(135deg, #FF6482, #E8566E); }
+.icon-wallet { background: linear-gradient(135deg, #FFD60A, #E6C009); }
+.icon-shopping { background: linear-gradient(135deg, #FF9F0A, #E68F09); }
+.icon-stocks { background: linear-gradient(135deg, #30D158, #28B84C); }
+.icon-diary { background: linear-gradient(135deg, #BF5AF2, #A64AD9); }
+.icon-relationship { background: linear-gradient(135deg, #FF375F, #D62F50); }
+.icon-favorites { background: linear-gradient(135deg, #FFD60A, #E6C009); }
+.icon-driftbottle { background: linear-gradient(135deg, #64D2FF, #5AC8F5); }
+.icon-game { background: linear-gradient(135deg, #5E5CE6, #4F4DD4); }
+.icon-companion { background: linear-gradient(135deg, #FF6482, #E8566E); }
+.icon-settings { background: linear-gradient(135deg, #8E8E93, #636366); }
+
+/* --- 页面指示器 --- */
+#page-indicator {
+    display: flex; justify-content: center; align-items: center;
+    gap: 8px; padding: 8px 0 4px; flex-shrink: 0;
+}
+.page-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--page-indicator-color);
+    transition: all 0.3s ease;
+}
+.page-dot.active { background: var(--page-indicator-active); width: 20px; border-radius: 4px; }
+
+/* --- 底部 Dock --- */
+#home-dock {
+    display: flex; justify-content: space-evenly; align-items: center;
+    height: var(--dock-height);
+    padding: 8px 16px calc(env(safe-area-inset-bottom, 8px) + 8px);
+    background: var(--dock-bg);
+    backdrop-filter: blur(var(--dock-blur));
+    -webkit-backdrop-filter: blur(var(--dock-blur));
+    border-top: 1px solid var(--dock-border);
+    flex-shrink: 0;
+}
+#home-dock .app-icon-item { gap: 4px; }
+#home-dock .app-icon-box { width: calc(var(--icon-size) - 2px); height: calc(var(--icon-size) - 2px); }
+
+/* --- 应用层动画 --- */
+.app-screen-layer {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 100;
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
+    will-change: transform, opacity;
+}
+.app-screen-layer.app-open { transform: translateY(0); opacity: 1; }
+.app-screen-layer.app-closing {
+    transform: translateY(100%); opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
+}
+
+/* --- 桌面模式 --- */
+@media (min-width: 500px) {
+    body { background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%) !important; }
+    #phone-shell { margin: auto; box-shadow: var(--phone-shell-shadow), 0 0 120px rgba(0,100,200,0.08); }
+}
+@media (max-width: 499px) {
+    #phone-shell { max-width: 100%; max-height: 100%; border-radius: 0; padding: 0; box-shadow: none; }
+    #phone-shell::before, #phone-shell::after { display: none; }
+    #phone-inner-screen { border-radius: 0; }
+}
+
+/* --- 图标弹跳动画 --- */
+@keyframes iconBounceIn {
+    0% { opacity: 0; transform: scale(0.3) translateY(20px); }
+    50% { opacity: 1; transform: scale(1.08) translateY(-4px); }
+    70% { transform: scale(0.95) translateY(1px); }
+    100% { transform: scale(1) translateY(0); }
+}
+.app-icon-item.animate-in { animation: iconBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
 </style>
 </head>
 <body>
-    <!-- 认证页面 -->
-    <div id="auth-screen">
-      <div class="auth-card">
-        <!-- 登录表单 -->
-        <div id="auth-login-form">
-          <h2>Timi 小手机</h2>
-          <p class="subtitle">登录你的账号</p>
-          <div class="auth-error" id="login-error"></div>
-          <input class="auth-input" id="auth-login-user" type="text" placeholder="用户名" autocomplete="username">
-          <input class="auth-input" id="auth-login-pass" type="password" placeholder="密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')window._authManager.login()">
-          <button class="auth-btn auth-btn-primary" id="auth-login-btn" onclick="window._authManager.login()">登录</button>
-          <div class="auth-switch">还没有账号？<a onclick="window._authManager.showRegister()">注册</a></div>
-        </div>
-        <!-- 注册表单 -->
-        <div id="auth-register-form" style="display:none">
-          <h2>创建账号</h2>
-          <p class="subtitle">需要邀请码注册</p>
-          <div class="auth-error" id="register-error"></div>
-          <input class="auth-input" id="auth-reg-user" type="text" placeholder="用户名（2-20字符）" autocomplete="username">
-          <input class="auth-input" id="auth-reg-pass" type="password" placeholder="密码（至少6位）" autocomplete="new-password">
-          <input class="auth-input" id="auth-reg-code" type="text" placeholder="邀请码" onkeydown="if(event.key==='Enter')window._authManager.register()">
-          <button class="auth-btn auth-btn-primary" id="auth-reg-btn" onclick="window._authManager.register()">注册</button>
-          <div class="auth-switch">已有账号？<a onclick="window._authManager.showLogin()">登录</a></div>
-        </div>
-      </div>
-    </div>
-    <!-- 同步状态提示 -->
-    <div class="auth-sync-status" id="sync-status"></div>
+    <!-- ========== 手机外壳 ========== -->
+    <div id="phone-shell">
+        <div id="phone-inner-screen">
+            <!-- 认证页面 -->
+            <div id="auth-screen" style="position:absolute;inset:0;z-index:500;background:linear-gradient(160deg, #0a1628 0%, #0f2847 30%, #1a4a7a 60%, #2d6aa0 80%, #4a90c4 100%);display:flex;align-items:center;justify-content:center;">
+              <div class="auth-card">
+                <div id="auth-login-form">
+                  <h2>Timi 小手机</h2>
+                  <p class="subtitle">登录你的账号</p>
+                  <div class="auth-error" id="login-error"></div>
+                  <input class="auth-input" id="auth-login-user" type="text" placeholder="用户名" autocomplete="username">
+                  <input class="auth-input" id="auth-login-pass" type="password" placeholder="密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')window._authManager.login()">
+                  <button class="auth-btn auth-btn-primary" id="auth-login-btn" onclick="window._authManager.login()">登录</button>
+                  <div class="auth-switch">还没有账号？<a onclick="window._authManager.showRegister()">注册</a></div>
+                </div>
+                <div id="auth-register-form" style="display:none">
+                  <h2>创建账号</h2>
+                  <p class="subtitle">需要邀请码注册</p>
+                  <div class="auth-error" id="register-error"></div>
+                  <input class="auth-input" id="auth-reg-user" type="text" placeholder="用户名（2-20字符）" autocomplete="username">
+                  <input class="auth-input" id="auth-reg-pass" type="password" placeholder="密码（至少6位）" autocomplete="new-password">
+                  <input class="auth-input" id="auth-reg-code" type="text" placeholder="邀请码" onkeydown="if(event.key==='Enter')window._authManager.register()">
+                  <button class="auth-btn auth-btn-primary" id="auth-reg-btn" onclick="window._authManager.register()">注册</button>
+                  <div class="auth-switch">已有账号？<a onclick="window._authManager.showLogin()">登录</a></div>
+                </div>
+              </div>
+            </div>
+            <!-- 同步状态提示 -->
+            <div class="auth-sync-status" id="sync-status"></div>
+            <!-- 灵动岛 -->
+            <div id="dynamic-island"></div>
+            <!-- 状态栏 -->
+            <div id="status-bar">
+                <div id="status-bar-time">9:41</div>
+                <div id="status-bar-icons">
+                    <i class="fas fa-signal"></i>
+                    <i class="fas fa-wifi"></i>
+                    <span class="status-battery">
+                        <span class="status-battery-icon"><span class="status-battery-level"></span></span>
+                    </span>
+                </div>
+            </div>
 
-    <div id="app-container">
+            <!-- ========== 主屏幕 ========== -->
+            <div id="home-screen">
+                <div id="wallpaper-layer"></div>
+                <div id="home-pages-wrapper">
+                    <div id="home-pages-track">
+                        <!-- 第一页：核心应用 -->
+                        <div class="home-page" id="home-page-1">
+                            <div class="app-icon-item" data-app="wechat" onclick="openAppFromHome('wechat')">
+                                <div class="app-icon-box icon-wechat"><i class="fab fa-weixin"></i></div>
+                                <span class="app-icon-label">微信</span>
+                            </div>
+                            <div class="app-icon-item" data-app="sms" onclick="openAppFromHome('sms')">
+                                <div class="app-icon-box icon-sms"><i class="fas fa-comment-dots"></i></div>
+                                <span class="app-icon-label">短信</span>
+                            </div>
+                            <div class="app-icon-item" data-app="music" onclick="openAppFromHome('music')">
+                                <div class="app-icon-box icon-music"><i class="fas fa-music"></i></div>
+                                <span class="app-icon-label">音乐</span>
+                            </div>
+                            <div class="app-icon-item" data-app="worldbook" onclick="openAppFromHome('worldbook')">
+                                <div class="app-icon-box icon-worldbook"><i class="fas fa-book-open"></i></div>
+                                <span class="app-icon-label">世界书</span>
+                            </div>
+                            <div class="app-icon-item" data-app="snoop" onclick="openAppFromHome('snoop')">
+                                <div class="app-icon-box icon-snoop"><i class="fas fa-eye"></i></div>
+                                <span class="app-icon-label">窥探</span>
+                            </div>
+                            <div class="app-icon-item" data-app="map" onclick="openAppFromHome('map')">
+                                <div class="app-icon-box icon-map"><i class="fas fa-map-marked-alt"></i></div>
+                                <span class="app-icon-label">地图</span>
+                            </div>
+                            <div class="app-icon-item" data-app="calendar" onclick="openAppFromHome('calendar')">
+                                <div class="app-icon-box icon-calendar"><i class="fas fa-calendar-alt"></i></div>
+                                <span class="app-icon-label">日历</span>
+                            </div>
+                            <div class="app-icon-item" data-app="album" onclick="openAppFromHome('album')">
+                                <div class="app-icon-box icon-album"><i class="fas fa-images"></i></div>
+                                <span class="app-icon-label">相册</span>
+                            </div>
+                            <div class="app-icon-item" data-app="wallet" onclick="openAppFromHome('wallet')">
+                                <div class="app-icon-box icon-wallet"><i class="fas fa-wallet"></i></div>
+                                <span class="app-icon-label">钱包</span>
+                            </div>
+                            <div class="app-icon-item" data-app="shopping" onclick="openAppFromHome('shopping')">
+                                <div class="app-icon-box icon-shopping"><i class="fas fa-shopping-bag"></i></div>
+                                <span class="app-icon-label">购物</span>
+                            </div>
+                            <div class="app-icon-item" data-app="stocks" onclick="openAppFromHome('stocks')">
+                                <div class="app-icon-box icon-stocks"><i class="fas fa-chart-line"></i></div>
+                                <span class="app-icon-label">股票</span>
+                            </div>
+                            <div class="app-icon-item" data-app="diary" onclick="openAppFromHome('diary')">
+                                <div class="app-icon-box icon-diary"><i class="fas fa-pen-fancy"></i></div>
+                                <span class="app-icon-label">日记</span>
+                            </div>
+                        </div>
+                        <!-- 第二页：更多应用 -->
+                        <div class="home-page" id="home-page-2">
+                            <div class="app-icon-item" data-app="relationship" onclick="openAppFromHome('relationship')">
+                                <div class="app-icon-box icon-relationship"><i class="fas fa-project-diagram"></i></div>
+                                <span class="app-icon-label">关系网络</span>
+                            </div>
+                            <div class="app-icon-item" data-app="favorites" onclick="openAppFromHome('favorites')">
+                                <div class="app-icon-box icon-favorites"><i class="fas fa-star"></i></div>
+                                <span class="app-icon-label">收藏</span>
+                            </div>
+                            <div class="app-icon-item" data-app="driftbottle" onclick="openAppFromHome('driftbottle')">
+                                <div class="app-icon-box icon-driftbottle"><i class="fas fa-bottle-water"></i></div>
+                                <span class="app-icon-label">漂流瓶</span>
+                            </div>
+                            <div class="app-icon-item" data-app="game" onclick="openAppFromHome('game')">
+                                <div class="app-icon-box icon-game"><i class="fas fa-gamepad"></i></div>
+                                <span class="app-icon-label">游戏</span>
+                            </div>
+                            <div class="app-icon-item" data-app="companion" onclick="openAppFromHome('companion')">
+                                <div class="app-icon-box icon-companion"><i class="fas fa-heart"></i></div>
+                                <span class="app-icon-label">伴侣</span>
+                            </div>
+                            <div class="app-icon-item" data-app="settings" onclick="openAppFromHome('settings')">
+                                <div class="app-icon-box icon-settings"><i class="fas fa-cog"></i></div>
+                                <span class="app-icon-label">设置</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 页面指示器 -->
+                <div id="page-indicator">
+                    <div class="page-dot active" data-page="0"></div>
+                    <div class="page-dot" data-page="1"></div>
+                </div>
+                <!-- 底部 Dock -->
+                <div id="home-dock">
+                    <div class="app-icon-item" data-app="wechat" onclick="openAppFromHome('wechat')">
+                        <div class="app-icon-box icon-wechat"><i class="fab fa-weixin"></i></div>
+                        <span class="app-icon-label">微信</span>
+                    </div>
+                    <div class="app-icon-item" data-app="sms" onclick="openAppFromHome('sms')">
+                        <div class="app-icon-box icon-sms"><i class="fas fa-comment-dots"></i></div>
+                        <span class="app-icon-label">短信</span>
+                    </div>
+                    <div class="app-icon-item" data-app="music" onclick="openAppFromHome('music')">
+                        <div class="app-icon-box icon-music"><i class="fas fa-music"></i></div>
+                        <span class="app-icon-label">音乐</span>
+                    </div>
+                    <div class="app-icon-item" data-app="settings" onclick="openAppFromHome('settings')">
+                        <div class="app-icon-box icon-settings"><i class="fas fa-cog"></i></div>
+                        <span class="app-icon-label">设置</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== 应用层（原有内容） ========== -->
+    <div id="app-container" class="app-screen-layer">
+            <!-- 底部回到桌面指示条 -->
+            <div id="home-indicator-bar" onclick="goBackToHome()" title="回到桌面">
+                <div class="home-indicator-pill"></div>
+            </div>
         <div id="screen">
             <div id="main-screen">
                 <div class="app-header">
@@ -29952,7 +30416,7 @@ async function callGameAI(systemPrompt) {
     const { apiKey, model, endpoint } = apiConfig;
 
     if (!apiKey || !endpoint || !model) {
-        const errorMsg = “错误：游戏无法启动，因为【聊天API设置】未配置。请前往”发现-API设置”进行配置。”;
+        const errorMsg = "错误：游戏无法启动，因为【聊天API设置】未配置。请前往「发现-API设置」进行配置。";
         console.error(errorMsg);
         alert(errorMsg);
         throw new Error(errorMsg);
@@ -42595,6 +43059,7 @@ attachEventListeners();
     // ===== 覆盖 _enterApp：登录/注册后进入应用 =====
     window._authManager._enterApp = async function() {
       document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('auth-screen').style.display = 'none';
       await syncManager.pull();
       await loadSnoopDataCache();
       await loadDataFromDB();
@@ -42607,13 +43072,28 @@ attachEventListeners();
       await renderThoughtPresets();
       updateNotificationDots();
       renderAttachmentMenu();
-      await showMainScreen();
-      showLockScreen();
+      // 登录后显示主屏幕桌面，而不是直接打开微信
+      var homeScreen = document.getElementById('home-screen');
+      if (homeScreen) homeScreen.style.display = 'flex';
+      // 预加载 main-screen 数据但不显示 app-container
+      hideAllScreens();
+      document.getElementById('main-screen').style.display = 'flex';
+      setActiveNav('chat');
       syncManager.startAutoSync();
     };
 
+// --- 暴露关键函数到 window，供主屏幕模块调用 ---
+window.showMainScreen = typeof showMainScreen === 'function' ? showMainScreen : undefined;
+window.hideAllScreens = typeof hideAllScreens === 'function' ? hideAllScreens : undefined;
+window.showSmsScreen = typeof showSmsScreen === 'function' ? showSmsScreen : undefined;
+window.showMusicLibraryScreen = typeof showMusicLibraryScreen === 'function' ? showMusicLibraryScreen : undefined;
+window.setActiveNav = typeof setActiveNav === 'function' ? setActiveNav : undefined;
+window.renderContacts = typeof renderContacts === 'function' ? renderContacts : undefined;
+window.renderWorldBooks = typeof renderWorldBooks === 'function' ? renderWorldBooks : undefined;
+window.syncManager = typeof syncManager !== 'undefined' ? syncManager : undefined;
+
 await initApp();
-}); 
+});
 </script>
 <script>
   if ('serviceWorker' in navigator) {
@@ -42763,5 +43243,276 @@ await initApp();
 })();
 </script>
         
+<!-- 关闭 #phone-inner-screen 和 #phone-shell -->
+        </div><!-- /#phone-inner-screen -->
+    </div><!-- /#phone-shell -->
+
+<script>
+// ============================================================
+// 主屏幕控制模块 (Phase 1 Redesign)
+// ============================================================
+(function initHomeScreen() {
+    'use strict';
+
+    // --- 状态栏时钟 ---
+    function updateStatusBarTime() {
+        const now = new Date();
+        const h = now.getHours().toString().padStart(2, '0');
+        const m = now.getMinutes().toString().padStart(2, '0');
+        const el = document.getElementById('status-bar-time');
+        if (el) el.textContent = h + ':' + m;
+    }
+    updateStatusBarTime();
+    setInterval(updateStatusBarTime, 15000);
+
+    // --- 主屏幕滑动逻辑 ---
+    const track = document.getElementById('home-pages-track');
+    const wrapper = document.getElementById('home-pages-wrapper');
+    const dots = document.querySelectorAll('#page-indicator .page-dot');
+    let currentPage = 0;
+    const totalPages = document.querySelectorAll('.home-page').length;
+    let startX = 0, startY = 0, currentX = 0, isDragging = false, isHorizontal = null;
+
+    function goToPage(page) {
+        currentPage = Math.max(0, Math.min(page, totalPages - 1));
+        track.style.transform = 'translateX(-' + (currentPage * 100) + '%)';
+        dots.forEach(function(d, i) {
+            d.classList.toggle('active', i === currentPage);
+        });
+    }
+
+    function onPointerDown(e) {
+        var touch = e.touches ? e.touches[0] : e;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        currentX = 0;
+        isDragging = true;
+        isHorizontal = null;
+        track.classList.add('swiping');
+    }
+
+    function onPointerMove(e) {
+        if (!isDragging) return;
+        var touch = e.touches ? e.touches[0] : e;
+        var dx = touch.clientX - startX;
+        var dy = touch.clientY - startY;
+
+        if (isHorizontal === null) {
+            if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+                isHorizontal = Math.abs(dx) > Math.abs(dy);
+            }
+            return;
+        }
+
+        if (!isHorizontal) return;
+        e.preventDefault();
+        currentX = dx;
+        var offset = -(currentPage * wrapper.offsetWidth) + dx;
+        track.style.transform = 'translateX(' + offset + 'px)';
+    }
+
+    function onPointerUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        track.classList.remove('swiping');
+
+        if (isHorizontal && Math.abs(currentX) > 50) {
+            if (currentX < 0 && currentPage < totalPages - 1) {
+                goToPage(currentPage + 1);
+            } else if (currentX > 0 && currentPage > 0) {
+                goToPage(currentPage - 1);
+            } else {
+                goToPage(currentPage);
+            }
+        } else {
+            goToPage(currentPage);
+        }
+    }
+
+    if (wrapper) {
+        wrapper.addEventListener('touchstart', onPointerDown, { passive: true });
+        wrapper.addEventListener('touchmove', onPointerMove, { passive: false });
+        wrapper.addEventListener('touchend', onPointerUp);
+        wrapper.addEventListener('mousedown', onPointerDown);
+        wrapper.addEventListener('mousemove', onPointerMove);
+        wrapper.addEventListener('mouseup', onPointerUp);
+        wrapper.addEventListener('mouseleave', onPointerUp);
+    }
+
+    // 点击页面指示器
+    dots.forEach(function(dot) {
+        dot.addEventListener('click', function() {
+            goToPage(parseInt(this.dataset.page));
+        });
+    });
+
+    // --- 图标入场动画 ---
+    function animateIcons() {
+        var icons = document.querySelectorAll('#home-page-1 .app-icon-item, #home-dock .app-icon-item');
+        icons.forEach(function(icon, i) {
+            icon.style.animationDelay = (i * 0.04) + 's';
+            icon.classList.add('animate-in');
+        });
+    }
+
+    // --- 应用打开/关闭 ---
+    var appContainer = document.getElementById('app-container');
+    var homeScreen = document.getElementById('home-screen');
+    var currentOpenApp = null;
+
+    // 应用ID到显示函数的映射
+    var appMap = {
+        'wechat': function() { if (window.showMainScreen) window.showMainScreen(); },
+        'sms': function() { if (window.showSmsScreen) window.showSmsScreen(); },
+        'music': function() { if (window.showMusicLibraryScreen) window.showMusicLibraryScreen(); },
+        'worldbook': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('world-book-screen');
+            if (el) el.style.display = 'flex';
+            if (window.renderWorldBooks) window.renderWorldBooks();
+        },
+        'snoop': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('snooped-phone-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'map': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('map-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'calendar': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('schedule-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'album': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('memory-album-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'wallet': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('wallet-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'shopping': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('shopping-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'stocks': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('investment-center-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'diary': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('diary-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'relationship': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('relationship-network-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'favorites': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('favorites-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'driftbottle': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+        },
+        'game': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('investment-center-screen');
+            if (el) el.style.display = 'flex';
+        },
+        'companion': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            if (typeof initCompanionApp === 'function') initCompanionApp();
+        },
+        'settings': function() {
+            if (window.hideAllScreens) window.hideAllScreens();
+            var el = document.getElementById('api-settings-screen');
+            if (el) el.style.display = 'flex';
+        }
+    };
+
+    window.openAppFromHome = function(appId) {
+        if (!appContainer || !homeScreen) return;
+        currentOpenApp = appId;
+
+        // 主屏幕缩小
+        homeScreen.classList.add('app-active');
+
+        // 应用层滑入
+        appContainer.classList.add('app-open');
+        appContainer.classList.remove('app-closing');
+        appContainer.style.display = '';
+
+        // 调用对应应用的显示函数
+        setTimeout(function() {
+            var fn = appMap[appId];
+            if (fn) fn();
+        }, 50);
+    };
+
+    window.goBackToHome = function() {
+        if (!appContainer || !homeScreen) return;
+
+        // 应用层滑出
+        appContainer.classList.remove('app-open');
+        appContainer.classList.add('app-closing');
+
+        // 主屏幕恢复
+        homeScreen.classList.remove('app-active');
+
+        setTimeout(function() {
+            appContainer.classList.remove('app-closing');
+            currentOpenApp = null;
+        }, 400);
+    };
+
+    // 等待 DOM 和其他脚本加载完成
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            animateIcons();
+        });
+    } else {
+        setTimeout(animateIcons, 100);
+    }
+
+    // 确保认证通过后显示主屏幕
+    var authScreen = document.getElementById('auth-screen');
+    if (authScreen) {
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(m) {
+                if (authScreen.style.display === 'none') {
+                    homeScreen.style.display = 'flex';
+                    animateIcons();
+                }
+            });
+        });
+        observer.observe(authScreen, { attributes: true, attributeFilter: ['style'] });
+    }
+
+    // 确保 app-container 默认隐藏（等待从主屏幕打开）
+    if (appContainer) {
+        appContainer.classList.remove('app-open');
+    }
+
+    // 拦截现有的初始化逻辑，防止自动显示 app-container
+    var _origShowMainScreen = window.showMainScreen;
+    var _homeScreenReady = false;
+
+    // 标记主屏幕已就绪
+    setTimeout(function() { _homeScreenReady = true; }, 500);
+
+    console.log('Timi Home Screen initialized');
+})();
+</script>
+
 </body>
 </html>
