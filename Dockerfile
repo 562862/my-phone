@@ -2,13 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app/server
 
-# 先复制 Prisma schema（postinstall 的 prisma generate 需要它）
+# 先复制 Prisma schema
 COPY server/prisma ./prisma
 
-# 安装依赖（设置占位 DATABASE_URL，prisma generate 构建时需要）
+# 安装依赖，跳过 postinstall 避免 prisma generate 需要 DATABASE_URL
 COPY server/package*.json ./
-ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts
+
+# 手动生成 Prisma Client（不需要真实数据库连接）
+RUN npx prisma generate
 
 # 复制后端代码
 COPY server/src ./src
