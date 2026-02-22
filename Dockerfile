@@ -2,13 +2,12 @@ FROM node:20-alpine
 
 WORKDIR /app/server
 
+# 先复制 Prisma schema（postinstall 的 prisma generate 需要它）
+COPY server/prisma ./prisma
+
 # 安装依赖
 COPY server/package*.json ./
 RUN npm ci --omit=dev
-
-# 复制 Prisma schema 并生成客户端
-COPY server/prisma ./prisma
-RUN npx prisma generate
 
 # 复制后端代码
 COPY server/src ./src
