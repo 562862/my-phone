@@ -1,4 +1,5 @@
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const path = require('path');
 const config = require('./config');
@@ -10,6 +11,7 @@ const adminRoutes = require('./routes/admin');
 const app = express();
 
 // 中间件
+app.use(compression()); // gzip 压缩所有响应
 app.use(cors());
 app.use(express.json({ limit: '50mb' })); // 同步数据可能较大
 
@@ -24,9 +26,10 @@ app.use('/admin', express.static(path.join(__dirname, '../admin')));
 // 前端静态文件（项目根目录）
 app.use(express.static(path.join(__dirname, '../../'), {
   index: 'index.html',
-  // 排除 server 目录
+  maxAge: '7d', // 静态资源缓存 7 天
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) {
+      // HTML 不缓存，确保更新及时生效
       res.setHeader('Cache-Control', 'no-cache');
     }
   },
