@@ -8069,7 +8069,7 @@ input:checked + .mini-slider:before { transform: translateX(16px); }
             <div id="profile-screen">
                 <div class="profile-header">
                     <div class="avatar-container">
-                        <img src="https://via.placeholder.com/100/A0DCF8/FFFFFF?text=ME" alt="我的头像" class="profile-avatar" id="my-profile-avatar">
+                        <img src="https://placehold.co/100/A0DCF8/FFFFFF?text=ME" alt="我的头像" class="profile-avatar" id="my-profile-avatar">
                         <div class="change-avatar-btn" id="change-avatar-btn">
                             <i class="fas fa-camera"></i>
                         </div>
@@ -13908,12 +13908,12 @@ function createContactItem(contact) {
     let avatarHTML = '';
     if (isGroup) {
         if (contact.avatar) {
-            avatarHTML = `<img src="${contact.avatar}" onerror="this.onerror=null;this.src='https://via.placeholder.com/50/DDD/666?text=G';" alt="${contact.name}头像">`;
+            avatarHTML = `<img src="${contact.avatar}" onerror="this.onerror=null;this.src='https://placehold.co/50/DDD/666?text=G';" alt="${contact.name}头像">`;
         } else {
             avatarHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size: 22px; color: var(--theme-primary);"><i class="fas fa-users"></i></div>`;
         }
     } else {
-        avatarHTML = (contact.avatar ? `<img src="${contact.avatar}" onerror="this.onerror=null;this.src='https://via.placeholder.com/50/DDD/666?text=U';" alt="${contact.name}头像">` : `<i class="fas fa-user"></i>`);
+        avatarHTML = (contact.avatar ? `<img src="${contact.avatar}" onerror="this.onerror=null;this.src='https://placehold.co/50/DDD/666?text=U';" alt="${contact.name}头像">` : `<i class="fas fa-user"></i>`);
     }
 
   // ▼▼▼ 【核心修正：火花图标逻辑 (带开关)】 ▼▼▼
@@ -14144,7 +14144,7 @@ function createPostItem(post, isDetailView = false) {
     }
 
     const authorName = author.name;
-    const authorAvatar = author.avatar || 'https://via.placeholder.com/45/DDD/666?text=U';
+    const authorAvatar = author.avatar || 'https://placehold.co/45/DDD/666?text=U';
     const isLiked = post.likes.includes(state.myProfile.name);
 
     let redPacketHTML = '';
@@ -14186,7 +14186,7 @@ function createPostItem(post, isDetailView = false) {
     if (isDetailView) {
         postItem.innerHTML = `
             <div class="post-delete-btn" data-post-id="${post.id}" title="删除帖子"><i class="fas fa-trash-alt"></i></div>
-            <div class="post-item-avatar"><img src="${safeImgSrc(authorAvatar)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/45/DDD/666?text=U';" alt="${escapeHtml(authorName)}的头像"></div>
+            <div class="post-item-avatar"><img src="${safeImgSrc(authorAvatar)}" onerror="this.onerror=null;this.src='https://placehold.co/45/DDD/666?text=U';" alt="${escapeHtml(authorName)}的头像"></div>
             <div class="post-content-area">
                 <div>
                     <span class="post-author-name">${escapeHtml(authorName)}</span>
@@ -14604,7 +14604,7 @@ async function renderEmoticonLibrary() {
             
             // 核心修改：添加 check-mark 元素
             item.innerHTML = `
-                <img src="${emo.url}" alt="${emo.name}" onerror="this.src='https://via.placeholder.com/60?text=Error';">
+                <img src="${emo.url}" alt="${emo.name}" onerror="this.src='https://placehold.co/60?text=Error';">
                 <div class="emoticon-name">${emo.name}</div>
                 <div class="emoticon-check-mark"><i class="fas fa-check"></i></div>
                 ${!isEmoEditMode ? `<button class="emoticon-delete-btn" data-emoticon-id="${emo.id}">&times;</button>` : ''}
@@ -15061,7 +15061,7 @@ async function showTrendingTopicScreen(topicTitle, topicDescription) {
             
             batchedPetActions = [];
             
-            document.getElementById('char-profile-avatar').src = contact.avatar || `https://via.placeholder.com/70/DDD/666?text=${contact.name.substring(0,1).toUpperCase()}`;
+            document.getElementById('char-profile-avatar').src = contact.avatar || `https://placehold.co/70/DDD/666?text=${contact.name.substring(0,1).toUpperCase()}`;
             document.getElementById('char-profile-name').textContent = contact.name;
             document.getElementById('char-name-value').textContent = contact.name;
             document.getElementById('char-signature-value').textContent = contact.signature || '未设置';
@@ -15746,7 +15746,7 @@ async function showRedPacketDetails(packetData, senderProfile) {
 
     // 6. 渲染领取者列表（这部分逻辑已是正确的）
     for (const claimer of claimers) {
-        const claimerProfile = authorProfiles.get(claimer.userId) || { name: '一位路人', avatar: 'https://via.placeholder.com/40/DDD/666?text=?' };
+        const claimerProfile = authorProfiles.get(claimer.userId) || { name: '一位路人', avatar: 'https://placehold.co/40/DDD/666?text=?' };
         const item = document.createElement('div');
         item.className = 'claimer-item';
         let bestLuckHTML = '';
@@ -16899,7 +16899,7 @@ if (message.sender === 'user' && message.type !== 'system_notification') { // 2.
 
             wrapper.innerHTML = `
         <div class="message-avatar">
-    <img src="${finalAvatarUrl}" onerror="this.onerror=null;this.src='https://via.placeholder.com/40/DDD/666?text=U';">
+    <img src="${finalAvatarUrl}" onerror="this.onerror=null;this.src='https://placehold.co/40/DDD/666?text=U';">
 </div>
         <div class="message-body">
             ${showAuthorName ? `<div class="message-author-name">${escapeHtml(finalSenderInfo.name)}</div>` : ''}
@@ -17399,7 +17399,7 @@ async function createAndAddMessage(messageData, sender = 'user', targetContact =
             if (senderProfile) {
                 new Notification(senderProfile.name, {
                     body: notificationBody,
-                    icon: senderProfile.avatar || 'https://via.placeholder.com/40' // 提供一个默认图标
+                    icon: senderProfile.avatar || 'https://placehold.co/40' // 提供一个默认图标
                 });
             }
         }
@@ -27253,7 +27253,7 @@ async function renderRelationshipNetwork(contactId) {
         
         item.innerHTML = `
             <div class="preset-info" style="display: flex; align-items: center;">
-                <img src="${currentNodeAvatar || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 15px;">
+                <img src="${currentNodeAvatar || 'https://placehold.co/40'}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 15px;">
                 <div class="preset-name">
                     ${currentNodeName} 
                     ${statusTag}
@@ -27527,7 +27527,7 @@ async function renderRelationshipGraph(contactId) {
         return {
             id: node.id,
             name: finalName, // <-- 现在用的是修复后的名字
-            avatar: finalAvatar || `https://via.placeholder.com/${isCenter ? 60 : 45}/DDD/666?text=${finalName.substring(0,1)}`, // <-- 现在用的是修复后的头像
+            avatar: finalAvatar || `https://placehold.co/${isCenter ? 60 : 45}/DDD/666?text=${finalName.substring(0,1)}`, // <-- 现在用的是修复后的头像
             size: isCenter ? 60 : 45
         }
     });
@@ -31837,7 +31837,7 @@ async function openForwardChatModal() {
             }
         } else {
             // C. 私聊
-            imgSrc = contact.avatar || `https://via.placeholder.com/40/DDD/666?text=${contact.name.substring(0,1)}`;
+            imgSrc = contact.avatar || `https://placehold.co/40/DDD/666?text=${contact.name.substring(0,1)}`;
         }
 
         // 如果不是B情况 (即是私聊或有头像的群聊)，就统一使用 <img> 标签
@@ -35809,7 +35809,7 @@ function renderBottleCard(data) {
     document.getElementById('bottle-loading').style.display = 'none';
     document.getElementById('bottle-result').style.display = 'block';
 
-    document.getElementById('bottle-avatar').src = data.avatar || 'https://via.placeholder.com/80';
+    document.getElementById('bottle-avatar').src = data.avatar || 'https://placehold.co/80';
     document.getElementById('bottle-name').textContent = data.name;
     document.getElementById('bottle-location').textContent = `来自 ${data.nationality || '未知'} · ${data.age}岁`;
     
@@ -36248,7 +36248,7 @@ async function favoriteSelectedMessages() {
             senderProfile = { id: 'myProfile', name: state.myProfile.name, avatar: state.myProfile.avatar };
         } else if (contact.isGroup) {
             const sender = state.contacts.find(c => c.id === message.sender);
-            senderProfile = sender ? { id: sender.id, name: sender.name, avatar: sender.avatar } : { id: 'unknown', name: '未知成员', avatar: 'https://via.placeholder.com/40' };
+            senderProfile = sender ? { id: sender.id, name: sender.name, avatar: sender.avatar } : { id: 'unknown', name: '未知成员', avatar: 'https://placehold.co/40' };
         } else {
             senderProfile = { id: contact.id, name: contact.name, avatar: contact.avatar };
         }
