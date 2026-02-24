@@ -54,7 +54,7 @@ app.listen(config.port, () => {
 // 自动创建管理员账号
 async function initAdmin() {
   const { PrismaClient } = require('@prisma/client');
-  const bcrypt = require('bcrypt');
+  const bcrypt = require('bcryptjs');
   const prisma = new PrismaClient();
 
   try {
